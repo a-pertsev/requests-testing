@@ -1,0 +1,6 @@
+.coverage
+*.egg-info
+*.pyc
+
+.idea
+*.iml

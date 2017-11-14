@@ -1,0 +1,33 @@
+language: python
+sudo: false
+python:
+  - "2.7"
+  - "3.3"
+  - "3.4"
+  - "3.5"
+  - "3.6"
+  - "3.6-dev"
+  - "3.7-dev"
+  - "nightly"
+cache:
+  directories:
+    - .pip_download_cache
+env:
+  matrix:
+    - REQUESTS=requests==2.0
+    - REQUESTS=-U requests
+    - REQUESTS="-e git+git://github.com/kennethreitz/requests.git#egg=requests"
+  global:
+    - PIP_DOWNLOAD_CACHE=".pip_download_cache"
+matrix:
+  allow_failures:
+    - env: 'REQUESTS="-e git+git://github.com/kennethreitz/requests.git#egg=requests"'
+install:
+  - pip install codecov
+  - "pip install ${REQUESTS}"
+  - pip install -e "file://`pwd`#egg=responses[tests]"
+script:
+  - flake8 .
+  - py.test . --cov requests_testing --cov-report term-missing
+after_success:
+  - codecov -e REQUESTS -e TRAVIS_PYTHON_VERSION
