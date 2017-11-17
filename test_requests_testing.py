@@ -30,7 +30,7 @@ def test_default_error():
     assert len(requests_testing.calls) == 1
     assert requests_testing.calls[0].request.url == 'http://example.com/foo'
     assert type(requests_testing.calls[0].response) is ConnectionError
-    assert requests_testing.calls[0].response.request
+    requests.get('http://example.com')
 
 
 @requests_testing.activate
@@ -106,6 +106,8 @@ def test_query_mismatch():
 
     with pytest.raises(ConnectionError):
         requests.get(url)
+
+    requests.get(mismatch_url)
 
 
 methods = [('GET', requests.get), ('POST', requests.post), ('PUT', requests.put)]
@@ -183,3 +185,22 @@ def test_passthru(httpserver):
         resp = requests.get(httpserver.url)
         assert resp.text == 'local OK'
     run()
+
+
+def test_check_not_called_request():
+    @requests_testing.activate
+    def run():
+        requests_testing.add('http://example.com', 'ok')
+
+    with pytest.raises(requests_testing.NotCalledRequestException):
+        run()
+
+
+def test_check_not_called_request_does_not_swallow_exceptions():
+    @requests_testing.activate
+    def run():
+        requests_testing.add('http://example.com', 'ok')
+        raise AssertionError('test')
+
+    with pytest.raises(AssertionError):
+        run()

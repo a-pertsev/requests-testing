@@ -46,6 +46,10 @@ def _to_utf8_bytes(some):
     return some
 
 
+class NotCalledRequestException(BaseException):
+    pass
+
+
 class _ParsedRequest(object):
     def __init__(self, request_dict):
         self.url, self.query_params = self.parse_url(request_dict.get('url'))
@@ -112,13 +116,16 @@ class _ParsedRequest(object):
 
 
 class MockedRequest(object):
-    def __init__(self, request, response=None, calls_limit=None):
+    def __init__(self, request, response=None, calls_limit=1):
         if isinstance(request, six.string_types):
             request = {'url': request}
+
         if isinstance(response, six.string_types):
             response = {'body': response}
+
         self.request = _ParsedRequest(request)
         self.response = response if response is not None else {}
+
         self.calls_limit = calls_limit
 
 
@@ -138,7 +145,6 @@ class Mock(object):
     def _find_match(self, request):
         for i, mocked in enumerate(self._mocked_requests):
             if mocked.request.matches(request):
-
                 if mocked.calls_limit is not None:
                     mocked.calls_limit -= 1
                     if mocked.calls_limit == 0:
@@ -184,10 +190,25 @@ class Mock(object):
         except (KeyError, TypeError):
             pass
 
-    def _stop(self):
+    def check_not_called(self):
+        if self._mocked_requests:
+            raise NotCalledRequestException(
+                'Not all mocked requests have been called: %r',
+                [(mock.request.method, mock.request.url)
+                 for mock in self._mocked_requests]
+            )
+
+    def _stop(self, assert_not_called):
         self._patcher.stop()
         self.calls[:] = []
-        self._mocked_requests = []
+
+        try:
+            if assert_not_called:
+                self.check_not_called()
+        except NotCalledRequestException:
+            raise
+        finally:
+            self._mocked_requests = []
 
     def _start(self):
         self._real_send = HTTPAdapter.send
@@ -201,7 +222,7 @@ class Mock(object):
 
     def __exit__(self, ex_type, value, traceback):
         success = ex_type is None
-        self._stop()
+        self._stop(assert_not_called=success)
         return success
 
 
