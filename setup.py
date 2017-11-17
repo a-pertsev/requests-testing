@@ -49,6 +49,7 @@ setup(
     name='requests-testing',
     version='0.1',
     author='Pertsev Alexey',
+    author_email='oeermanz@gmail.com',
     description='A utility library for mocking out the `requests` Python library.',
     url='https://github.com/a-pertsev/requests-testing',
     license='Apache 2.0',
@@ -67,7 +68,9 @@ setup(
         'Intended Audience :: Information Technology',
         'Operating System :: OS Independent',
         'Programming Language :: Python :: 2',
-        'Programming Language :: Python :: 2.7'
+        'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
         'Topic :: Software Development'
-    ], )
+    ],
+    keywords='requests mock testing',
+)

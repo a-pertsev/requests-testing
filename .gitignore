@@ -1,6 +1,10 @@
 .coverage
 *.egg-info
 *.pyc
+.cache
+
+/dist
+/build
 
 .idea
 *.iml
