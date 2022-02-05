@@ -47,7 +47,7 @@ class PyTest(TestCommand):
 
 setup(
     name='requests-testing',
-    version='0.1',
+    version='0.2.0',
     author='Pertsev Alexey',
     author_email='oeermanz@gmail.com',
     description='A utility library for mocking out the `requests` Python library.',
